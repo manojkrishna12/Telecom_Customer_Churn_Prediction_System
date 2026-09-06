@@ -5,10 +5,15 @@ Endpoints:
   GET  /model-info  -> model name + held-out test metrics (from metrics.json)
   POST /predict     -> churn prediction for one customer
 
-Run from the backend/ directory:
+Run from the backend/ directory (local development):
     uvicorn app.main:app --reload --port 8000
+
+Deployment: set CORS_ALLOW_ORIGINS to the deployed frontend origin,
+e.g. CORS_ALLOW_ORIGINS=https://my-app.onrender.com (comma-separated for
+multiple origins). Defaults to the local Vite dev servers.
 """
 
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
@@ -43,14 +48,22 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# CORS origins: local dev servers by default; the deployed frontend origin
+# is injected via the CORS_ALLOW_ORIGINS environment variable in production
+# (comma-separated). No "*" wildcard - the deployed origin is explicit.
+_DEFAULT_ORIGINS = [
+    "http://localhost:5173",   # Vite dev server
+    "http://127.0.0.1:5173",
+    "http://localhost:5174",   # Vite dev server (alternate port)
+    "http://127.0.0.1:5174",
+]
+_extra_origins = [
+    o.strip() for o in os.environ.get("CORS_ALLOW_ORIGINS", "").split(",") if o.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",   # Vite dev server
-        "http://127.0.0.1:5173",
-        "http://localhost:5174",   # Vite dev server (alternate port)
-        "http://127.0.0.1:5174",
-    ],
+    allow_origins=_DEFAULT_ORIGINS + _extra_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

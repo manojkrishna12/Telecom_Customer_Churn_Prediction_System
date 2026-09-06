@@ -1,0 +1,31 @@
+# Render Blueprint — deploys the FastAPI backend.
+#
+# The model artifact (ml/artifacts/model.joblib, ~34 MB) is intentionally not
+# in git. This service's build command regenerates it with the existing
+# training code (python -m ml.train) — no changes to ML methodology.
+#
+# Deploy: Render dashboard -> New -> Blueprint -> select this repository.
+# After the FIRST deploy completes, set the environment variable below:
+#   CORS_ALLOW_ORIGINS = https://<your-frontend-hostname>
+# (add the frontend service first, then paste its URL here and redeploy)
+#
+# Free-tier note: the service sleeps after ~15 min idle; the first request
+# afterwards takes ~50 s while the instance wakes AND reloads the model.
+
+services:
+  - type: web
+    name: churn-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    # Build: install deps, then train from the repo root to generate artifacts.
+    # backend/requirements.txt already contains the full ML stack
+    # (scikit-learn, pandas, numpy, joblib) with matching versions.
+    buildCommand: pip install -r requirements.txt && cd .. && python -m ml.train
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.10"
+      - key: CORS_ALLOW_ORIGINS
+        sync: false   # set in dashboard: https://<frontend-host>

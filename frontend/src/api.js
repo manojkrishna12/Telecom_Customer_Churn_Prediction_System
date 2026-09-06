@@ -1,4 +1,10 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// API base URL: set VITE_API_BASE_URL for production builds (deployed HTTPS
+// backend), or VITE_API_URL in older .env files. Falls back to the local dev
+// server. This keeps localhost out of the production bundle.
+const API_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_URL ||
+  'http://localhost:8000'
 
 export async function fetchHealth(signal) {
   const res = await fetch(`${API_URL}/health`, { signal })
