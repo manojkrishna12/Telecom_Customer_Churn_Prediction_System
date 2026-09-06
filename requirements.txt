@@ -1,0 +1,10 @@
+# Telecom Customer Churn Prediction — root dependencies
+#
+# Shared by training (ml/) and the backend API (backend/).
+# Backend-only extras (fastapi, uvicorn, pytest, httpx) are listed in
+# backend/requirements.txt.
+
+pandas>=2.0
+numpy>=1.26,<2
+scikit-learn==1.4.2
+joblib>=1.3
