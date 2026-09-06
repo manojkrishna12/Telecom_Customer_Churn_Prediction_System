@@ -32,17 +32,27 @@ model). Nothing about the ML methodology changes for deployment.
 
 ## Frontend (Netlify)
 
+Build settings live in the repo's root `netlify.toml` and override the UI —
+no manual configuration is required:
+
+- **Base directory** `frontend` — scopes dependency detection, dependency
+  installation and the build to the frontend only. This is what stops Netlify
+  from scanning the repo root, finding the root `requirements.txt` (the
+  FastAPI/ML backend's dependencies) and failing its Python 3.14 installer on
+  `scikit-learn==1.4.2`. The root requirements.txt stays untouched for Render.
+- **Build command** `npm run build`, **Publish directory** `dist`
+  (relative to the base, i.e. `frontend/dist`).
+- `VITE_API_BASE_URL` is set in `netlify.toml` to the Render backend URL, so
+  every production build targets the deployed API (no localhost in the bundle).
+
 1. Netlify dashboard → **Add new site → Import an existing project** → pick
-   the GitHub repo.
-2. Settings:
-   - Base directory: `frontend`
-   - Build command: `npm run build`
-   - Publish directory: `frontend/dist`
-3. **Environment variable** (Site configuration → Environment variables):
-   - Key: `VITE_API_BASE_URL`
-   - Value: your Render backend URL, e.g. `https://churn-api-xxxx.onrender.com`
-4. Deploy. Note the URL, e.g. `https://<site>.netlify.app`.
-5. Go back to Render and set `CORS_ALLOW_ORIGINS=https://<site>.netlify.app`,
+   the GitHub repo → Deploy. The `netlify.toml` settings apply automatically.
+2. If your site was created *before* `netlify.toml` existed, open
+   **Project configuration → Build & deploy → Build settings** once and clear
+   any conflicting manually-set values (the toml takes precedence, but the UI
+   may show stale fields).
+3. Note the URL, e.g. `https://<site>.netlify.app`.
+4. Go back to Render and set `CORS_ALLOW_ORIGINS=https://<site>.netlify.app`,
    then redeploy the backend (Environment → save → automatic redeploy).
 
 ## Order matters

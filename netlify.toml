@@ -1,0 +1,24 @@
+# Netlify build configuration — frontend static site only.
+#
+# The repository root intentionally contains Python files (requirements.txt,
+# render.yaml) for the FastAPI/ML backend hosted on Render. Without `base`,
+# Netlify scans the repo root for dependency-management files, finds
+# requirements.txt and runs its Python dependency installer (on Python 3.14),
+# which fails building scikit-learn==1.4.2. Setting `base = "frontend"`
+# scopes dependency detection, dependency installation and the build command
+# to the frontend/ directory, so only frontend/package.json is considered and
+# the root requirements.txt is never touched.
+#
+# `publish` is resolved relative to `base` -> frontend/dist.
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # Production backend URL baked into every Netlify build so the deployed
+  # frontend always targets the Render API (no localhost in the bundle).
+  # Values here take precedence over UI-set env vars; if the backend URL
+  # ever changes, update it here.
+  VITE_API_BASE_URL = "https://churn-api-q9gt.onrender.com"
