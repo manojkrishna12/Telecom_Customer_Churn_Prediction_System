@@ -1,6 +1,7 @@
 // Model Performance panel. ALL values come from GET /model-info (which reads
 // metrics.json/metadata.json) - nothing is hardcoded here, so the panel stays
 // truthful if the model is retrained.
+import { ChartIcon } from './Icons.jsx'
 
 export default function ModelPanel({ info }) {
   if (!info || !info.test_metrics) return null
@@ -15,34 +16,36 @@ export default function ModelPanel({ info }) {
   ]
 
   return (
-    <div className="card model-panel">
-      <h2 className="card-title">Model Performance</h2>
-      <p className="card-subtitle">Held-out test set results (n = 1,409 customers).</p>
-
-      <div className="model-name-row">
-        <span className="model-name-label">Final Model</span>
-        <span className="model-name-value">{prettyModelName(model_name)}</span>
+    <div className="card model-panel" id="model-performance">
+      <div className="card-head">
+        <div className="card-icon" aria-hidden="true"><ChartIcon /></div>
+        <div>
+          <h2 className="card-title">Model Performance</h2>
+          <p className="card-subtitle">Held-out test set results (n = 1,409 customers).</p>
+        </div>
+        <span className="model-badge">Final Model: {prettyModelName(model_name)}</span>
       </div>
+
+      <ul className="metric-grid">
+        {metrics.map((m) => (
+          <li className="metric-tile" key={m.label}>
+            <span className="metric-label">{m.label}</span>
+            <span className="metric-value">{(m.value * 100).toFixed(2)}%</span>
+            <span className="metric-bar">
+              <span className="metric-fill" style={{ width: `${(m.value * 100).toFixed(1)}%` }} />
+            </span>
+          </li>
+        ))}
+      </ul>
 
       {Array.isArray(info.components) && info.components.length > 1 && (
         <div className="model-components">
+          <span className="components-label">Ensemble components:</span>
           {info.components.map((c) => (
             <span className="component-chip" key={c}>{c}</span>
           ))}
         </div>
       )}
-
-      <ul className="metric-list">
-        {metrics.map((m) => (
-          <li key={m.label}>
-            <span className="metric-label">{m.label}</span>
-            <span className="metric-bar">
-              <span className="metric-fill" style={{ width: `${(m.value * 100).toFixed(1)}%` }} />
-            </span>
-            <span className="metric-value">{(m.value * 100).toFixed(2)}%</span>
-          </li>
-        ))}
-      </ul>
 
       <p className="panel-note">
         The final model was selected after comparing multiple classification

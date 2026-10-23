@@ -2,8 +2,15 @@ import { useState } from 'react'
 import ChurnForm from './components/ChurnForm.jsx'
 import ResultCard from './components/ResultCard.jsx'
 import ModelPanel from './components/ModelPanel.jsx'
-import { fetchModelInfo, fetchPrediction } from './api.js'
+import { API_URL, fetchModelInfo, fetchPrediction } from './api.js'
 import { INITIAL_FORM, REQUIRED_SELECTS } from './formConfig.js'
+import {
+  AntennaIcon,
+  HomeIcon,
+  InfoIcon,
+  ChartIcon,
+  DocIcon,
+} from './components/Icons.jsx'
 
 // Client-side validation mirrors the backend contract (backend/app/schemas.py).
 // Caps here are physical sanity limits, not training-range limits - values
@@ -104,21 +111,32 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div className="app" id="top">
       <header className="app-header">
-        <h1>Telecom Customer Churn Prediction</h1>
-        <p className="app-subtitle">
-          Enter a customer&apos;s profile to estimate how likely they are to
-          cancel their service. A machine-learning model — trained on 7,043
-          historical customer records — returns an estimated churn
-          probability and a Low / Medium / High risk rating to help prioritize
-          retention efforts.
-        </p>
+        <div className="header-inner">
+          <div className="brand">
+            <div className="brand-icon"><AntennaIcon size={24} /></div>
+            <div className="brand-text">
+              <h1>Telecom Customer Churn Prediction</h1>
+              <p>Predict customer churn and identify high-risk customers</p>
+            </div>
+          </div>
+          <nav className="app-nav" aria-label="Main navigation">
+            <a className="nav-pill is-active" href="#top"><HomeIcon /><span>Home</span></a>
+            <a className="nav-pill" href="#about"><InfoIcon /><span>About</span></a>
+            <a className="nav-pill" href="#model-performance"><ChartIcon /><span>Model Info</span></a>
+            <a className="nav-pill" href={`${API_URL}/docs`} target="_blank" rel="noreferrer">
+              <DocIcon /><span>Documentation</span>
+            </a>
+          </nav>
+        </div>
       </header>
 
       {apiError && (
-        <div className="alert alert-error" role="alert">
-          <strong>Error:</strong> {apiError}
+        <div className="app-alert">
+          <div className="alert alert-error" role="alert">
+            <strong>Error:</strong> {apiError}
+          </div>
         </div>
       )}
 
@@ -139,7 +157,7 @@ export default function App() {
         </section>
       </main>
 
-      <footer className="app-footer">
+      <footer className="app-footer" id="about">
         Predictions are statistical estimates from historical data — not guarantees.
         Charges are in US dollars, matching the original dataset.
       </footer>

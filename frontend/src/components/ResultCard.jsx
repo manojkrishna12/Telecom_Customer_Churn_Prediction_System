@@ -1,4 +1,11 @@
-import { PLACEHOLDER } from '../formConfig.js'
+import {
+  ChartIcon,
+  CheckIcon,
+  AlertTriangleIcon,
+  UserPercentIcon,
+  ShieldIcon,
+  NoteIcon,
+} from './Icons.jsx'
 
 // Short, honest, probability-tiered explanation. Never states certainty.
 function explanationFor(riskLevel, probability) {
@@ -13,15 +20,37 @@ function explanationFor(riskLevel, probability) {
   }
 }
 
+// One-line banner subtitle per risk tier.
+function bannerCopy(riskLevel) {
+  switch (riskLevel) {
+    case 'High':
+      return 'This customer has a high estimated risk of churn.'
+    case 'Medium':
+      return 'This customer has an elevated estimated risk of churn.'
+    default:
+      return 'This customer has a low estimated risk of churn.'
+  }
+}
+
 export default function ResultCard({ result, onReset, submitting }) {
   const hasResult = !!result
+
+  const cardHead = (
+    <div className="card-head">
+      <div className="card-icon" aria-hidden="true"><ChartIcon /></div>
+      <div>
+        <h2 className="card-title">Prediction Result</h2>
+        <p className="card-subtitle">Model prediction based on the entered customer information.</p>
+      </div>
+    </div>
+  )
 
   if (!hasResult) {
     return (
       <div className="card result-card result-empty" aria-live="polite">
-        <h2 className="card-title">Prediction Result</h2>
+        {cardHead}
         <div className="empty-state">
-          <div className="empty-icon" aria-hidden="true">📊</div>
+          <div className="empty-icon" aria-hidden="true"><ChartIcon /></div>
           {submitting ? (
             <>
               <p className="empty-title">Evaluating customer…</p>
@@ -56,34 +85,50 @@ export default function ResultCard({ result, onReset, submitting }) {
 
   return (
     <div className={`card result-card ${churned ? 'result-churn' : 'result-stay'}`}>
-      <h2 className="card-title">Prediction Result</h2>
+      {cardHead}
 
-      <div className={`result-badge ${churned ? 'badge-churn' : 'badge-stay'}`}>
-        {churned ? '⚠ Likely to Churn' : '✓ Likely to Stay'}
+      <div className={`result-banner ${churned ? 'banner-churn' : 'banner-stay'}`}>
+        <span className="banner-icon" aria-hidden="true">
+          {churned ? <AlertTriangleIcon /> : <CheckIcon />}
+        </span>
+        <div>
+          <p className="banner-title">{churned ? 'Likely to Churn' : 'Likely to Stay'}</p>
+          <p className="banner-sub">{bannerCopy(risk_level)}</p>
+        </div>
       </div>
 
       <div className="result-stats">
         <div className="stat">
-          <span className="stat-label">Churn Probability</span>
-          <span className="stat-value">{pct}%</span>
+          <div className="stat-icon" aria-hidden="true"><UserPercentIcon /></div>
+          <div>
+            <span className="stat-label">Churn Probability</span>
+            <span className="stat-value">{pct}%</span>
+          </div>
         </div>
         <div className="stat">
-          <span className="stat-label">Risk Level</span>
-          <span className={`stat-value risk-pill ${riskClass}`}>{risk_level}</span>
+          <div className="stat-icon" aria-hidden="true"><ShieldIcon /></div>
+          <div>
+            <span className="stat-label">Risk Level</span>
+            <span className={`stat-value risk-pill ${riskClass}`}>{risk_level}</span>
+          </div>
         </div>
       </div>
 
       <div className="probability-bar" role="img"
            aria-label={`Estimated churn probability ${pct} percent`}>
         <div className="probability-fill" style={{ width: `${pct}%` }} />
-        <div className="probability-marker" style={{ left: '40%' }} title="Medium risk threshold (40%)" />
-        <div className="probability-marker" style={{ left: '70%' }} title="High risk threshold (70%)" />
+        <span className="gauge-tick" style={{ left: '40%' }} title="Medium risk threshold (40%)" />
+        <span className="gauge-tick" style={{ left: '70%' }} title="High risk threshold (70%)" />
+        <div className="probability-marker" style={{ left: `${pct}%` }} />
       </div>
       <div className="probability-scale">
         <span>0%</span><span>40% (Medium)</span><span>70% (High)</span><span>100%</span>
       </div>
 
-      <p className="result-explanation">{explanationFor(risk_level, churn_probability)}</p>
+      <p className="result-explanation">
+        <NoteIcon aria-hidden="true" />
+        <span>{explanationFor(risk_level, churn_probability)}</span>
+      </p>
 
       {Array.isArray(input_warnings) && input_warnings.length > 0 && (
         <div className="warning-box" role="status">
